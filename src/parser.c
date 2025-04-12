@@ -58,6 +58,7 @@ void parse(int argc, char **argv, Options *options, char ***paths, int *num_path
 
     // First pass: process options and count operands (paths)
     for (int i = 1; i < argc; i++) {
+        // TODO: Change this, cant use strcmp()
         if (strcmp(argv[i], "--") == 0) {
             // Skip the reserved marker
             continue;
@@ -81,6 +82,7 @@ void parse(int argc, char **argv, Options *options, char ***paths, int *num_path
     // Allocate an array exactly the size needed for the operands
     char **temp_paths = malloc(sizeof(char *) * count);
     if (!temp_paths) {
+        // TODO: Change, cant use perror()
         perror("malloc");
         exit(EXIT_FAILURE);
     }
@@ -88,6 +90,7 @@ void parse(int argc, char **argv, Options *options, char ***paths, int *num_path
     int index = 0;
     // Second pass: collect operand arguments.
     for (int i = 1; i < argc; i++) {
+        // TODO: Change this, cant use strcmp()
         if (strcmp(argv[i], "--") == 0) {
             continue;
         }
