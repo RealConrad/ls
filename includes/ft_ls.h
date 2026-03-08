@@ -40,9 +40,14 @@ void	args_free(t_args *args);
 void	output_str_fd(const char *s, int fd);
 void	output_char_fd(char c, int fd);
 size_t	ft_strlen(const char *s);
+char	*ft_strdup(const char *s);
+int		ft_strcmp(const char *s1, const char *s2);
 
 /* ---- error.c ---- */
 void	print_usage_error(char invalid_flag);
 void	print_errno_error(const char *path);
+
+/* ---- execute.c ---- */
+int		execute(t_options *opts, t_args *args);
 
 #endif

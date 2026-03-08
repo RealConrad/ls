@@ -9,7 +9,7 @@ static void	init_options(t_options *opts)
 	opts->flag_t = 0;
 }
 
-static void	debug_print(t_options *opts, t_args *args)
+void	debug_print(t_options *opts, t_args *args)
 {
 	int	i;
 
@@ -40,6 +40,7 @@ int	main(int argc, char **argv)
 {
 	t_options	opts;
 	t_args		args;
+	int			ret;
 
 	init_options(&opts);
 	if (args_init(&args, argc) == -1)
@@ -52,7 +53,9 @@ int	main(int argc, char **argv)
 		args_free(&args);
 		return (2);
 	}
-	debug_print(&opts, &args);
+	(void)debug_print;
+	// debug_print(&opts, &args);
+	ret = execute(&opts, &args);
 	args_free(&args);
-	return (0);
+	return (ret);
 }

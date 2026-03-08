@@ -9,7 +9,8 @@ INCDIR	= includes
 
 SRCS	= $(SRCDIR)/main.c \
 		  $(SRCDIR)/parse_args.c \
-		  $(SRCDIR)/args_list.c \
+		  $(SRCDIR)/args_array.c \
+		  $(SRCDIR)/execute.c \
 		  $(SRCDIR)/utils.c \
 		  $(SRCDIR)/error.c
 
