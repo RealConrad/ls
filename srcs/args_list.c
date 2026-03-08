@@ -7,7 +7,7 @@
 */
 int	args_init(t_args *args, int argc)
 {
-	args->paths = malloc(sizeof(char *) * (argc > 1 ? argc : 2));
+	args->paths = malloc(sizeof(char *) * argc);
 	if (!args->paths)
 		return (-1);
 	args->count = 0;
