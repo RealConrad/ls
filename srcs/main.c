@@ -24,7 +24,7 @@ static void	debug_print(t_options *opts, t_args *args)
 		output_str_fd("-r ", 1);
 	if (opts->flag_t)
 		output_str_fd("-t ", 1);
-	ft_putchar_fd('\n', 1);
+	output_char_fd('\n', 1);
 	output_str_fd("Paths:\n", 1);
 	i = 0;
 	while (i < args->count)
