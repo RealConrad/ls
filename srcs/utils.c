@@ -10,12 +10,12 @@ size_t	ft_strlen(const char *s)
 	return (len);
 }
 
-void	ft_putchar_fd(char c, int fd)
+void	output_char_fd(char c, int fd)
 {
 	write(fd, &c, 1);
 }
 
-void	ft_putstr_fd(const char *s, int fd)
+void	output_str_fd(const char *s, int fd)
 {
 	if (s)
 		write(fd, s, ft_strlen(s));

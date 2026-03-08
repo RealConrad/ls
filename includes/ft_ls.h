@@ -37,8 +37,8 @@ void	args_add(t_args *args, char *path);
 void	args_free(t_args *args);
 
 /* ---- utils.c ---- */
-void	ft_putstr_fd(const char *s, int fd);
-void	ft_putchar_fd(char c, int fd);
+void	output_str_fd(const char *s, int fd);
+void	output_char_fd(char c, int fd);
 size_t	ft_strlen(const char *s);
 
 /* ---- error.c ---- */

@@ -13,25 +13,25 @@ static void	debug_print(t_options *opts, t_args *args)
 {
 	int	i;
 
-	ft_putstr_fd("Flags:  ", 1);
+	output_str_fd("Flags:  ", 1);
 	if (opts->flag_l)
-		ft_putstr_fd("-l ", 1);
+		output_str_fd("-l ", 1);
 	if (opts->flag_upper_r)
-		ft_putstr_fd("-R ", 1);
+		output_str_fd("-R ", 1);
 	if (opts->flag_a)
-		ft_putstr_fd("-a ", 1);
+		output_str_fd("-a ", 1);
 	if (opts->flag_r)
-		ft_putstr_fd("-r ", 1);
+		output_str_fd("-r ", 1);
 	if (opts->flag_t)
-		ft_putstr_fd("-t ", 1);
+		output_str_fd("-t ", 1);
 	ft_putchar_fd('\n', 1);
-	ft_putstr_fd("Paths:\n", 1);
+	output_str_fd("Paths:\n", 1);
 	i = 0;
 	while (i < args->count)
 	{
-		ft_putstr_fd("  ", 1);
-		ft_putstr_fd(args->paths[i], 1);
-		ft_putchar_fd('\n', 1);
+		output_str_fd("  ", 1);
+		output_str_fd(args->paths[i], 1);
+		output_char_fd('\n', 1);
 		i++;
 	}
 }
@@ -44,7 +44,7 @@ int	main(int argc, char **argv)
 	init_options(&opts);
 	if (args_init(&args, argc) == -1)
 	{
-		ft_putstr_fd("ft_ls: memory allocation failed\n", 2);
+		output_str_fd("ft_ls: memory allocation failed\n", 2);
 		return (1);
 	}
 	if (parse_args(argc, argv, &opts, &args) == -1)
