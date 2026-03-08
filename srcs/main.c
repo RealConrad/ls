@@ -53,7 +53,6 @@ int	main(int argc, char **argv)
 		args_free(&args);
 		return (2);
 	}
-	(void)debug_print;
 	// debug_print(&opts, &args);
 	ret = execute(&opts, &args);
 	args_free(&args);
