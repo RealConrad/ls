@@ -25,9 +25,10 @@ static void	sort_names(char **names, int count)
 }
 
 /*
-** Count how many visible entries a directory has.
+** Count entries in a directory.
+** Skips dot-files unless -a is set.
 */
-static int	count_entries(const char *path)
+static int	count_entries(const char *path, t_options *opts)
 {
 	DIR				*dir;
 	struct dirent	*ent;
@@ -40,7 +41,7 @@ static int	count_entries(const char *path)
 	ent = readdir(dir);
 	while (ent)
 	{
-		if (ent->d_name[0] != '.')
+		if (ent->d_name[0] != '.' || opts->flag_a)
 			count++;
 		ent = readdir(dir);
 	}
@@ -53,7 +54,7 @@ static int	count_entries(const char *path)
 ** First pass counts, second pass fills.
 ** Returns the count, or -1 on error.
 */
-static int	read_dir(const char *path, char ***names_out)
+static int	read_dir(const char *path, t_options *opts, char ***names_out)
 {
 	DIR				*dir;
 	struct dirent	*ent;
@@ -61,7 +62,7 @@ static int	read_dir(const char *path, char ***names_out)
 	int				count;
 	int				i;
 
-	count = count_entries(path);
+	count = count_entries(path, opts);
 	if (count == -1)
 	{
 		print_errno_error(path);
@@ -80,7 +81,7 @@ static int	read_dir(const char *path, char ***names_out)
 	ent = readdir(dir);
 	while (ent)
 	{
-		if (ent->d_name[0] != '.')
+		if (ent->d_name[0] != '.' || opts->flag_a)
 		{
 			names[i] = ft_strdup(ent->d_name);
 			i++;
@@ -111,7 +112,7 @@ static void	free_names(char **names, int count)
 /*
 ** List one directory: read, sort, print.
 */
-static void	list_dir(const char *path, int print_header)
+static void	list_dir(const char *path, t_options *opts, int print_header)
 {
 	char	**names;
 	int		count;
@@ -122,7 +123,7 @@ static void	list_dir(const char *path, int print_header)
 		output_str_fd(path, 1);
 		output_str_fd(":\n", 1);
 	}
-	count = read_dir(path, &names);
+	count = read_dir(path, opts, &names);
 	if (count == -1)
 		return ;
 	sort_names(names, count);
@@ -130,10 +131,9 @@ static void	list_dir(const char *path, int print_header)
 	while (i < count)
 	{
 		output_str_fd(names[i], 1);
-		output_char_fd(' ', 1);
+		output_char_fd('\n', 1);
 		i++;
 	}
-    output_char_fd('\n', 1);
 	free_names(names, count);
 }
 
@@ -142,7 +142,6 @@ int	execute(t_options *opts, t_args *args)
 	int	i;
 	int	print_header;
 
-	(void)opts;
 	sort_names(args->paths, args->count);
 	print_header = (args->count > 1);
 	i = 0;
@@ -150,7 +149,7 @@ int	execute(t_options *opts, t_args *args)
 	{
 		if (i > 0)
 			output_char_fd('\n', 1);
-		list_dir(args->paths[i], print_header);
+		list_dir(args->paths[i], opts, print_header);
 		i++;
 	}
 	return (0);
