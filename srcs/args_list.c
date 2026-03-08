@@ -21,8 +21,7 @@ void	args_add(t_args *args, char *path)
 }
 
 /*
-** Free the paths array.  The strings themselves belong to argv,
-** so we only free the pointer array.
+** Free the paths array.  The strings themselves belong to argv
 */
 void	args_free(t_args *args)
 {

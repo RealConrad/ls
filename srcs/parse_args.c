@@ -38,7 +38,7 @@ static int	parse_flag_token(const char *token, t_options *opts)
 }
 
 /*
-** Rules (mirroring real ls behaviour):
+** Rules:
 **   1.  "--"  → stop flag parsing; every subsequent arg is a path.
 **   2.  "-"   → not a flag group; treat as a literal path argument.
 **   3.  "-xyz" where all of x,y,z are valid flags → set them.
