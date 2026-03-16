@@ -42,6 +42,7 @@ void	output_char_fd(char c, int fd);
 size_t	ft_strlen(const char *s);
 char	*ft_strdup(const char *s);
 int		ft_strcmp(const char *s1, const char *s2);
+char	*path_join(const char *dir, const char *name);
 
 /* ---- error.c ---- */
 void	print_usage_error(char invalid_flag);

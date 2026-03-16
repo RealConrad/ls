@@ -1,9 +1,21 @@
 #include "ft_ls.h"
 
+static void	list_dir(const char *path, t_options *opts, int print_header);
+
 /*
 ** Simple insertion sort on an array of strings.
 */
-static void	sort_names(char **names, int count)
+static int	cmp_names(const char *a, const char *b, t_options *opts)
+{
+	int	result;
+
+	result = ft_strcmp(a, b);
+	if (opts->flag_r)
+		return (-result);
+	return (result);
+}
+
+static void	sort_names(char **names, int count, t_options *opts)
 {
 	int		i;
 	int		j;
@@ -14,7 +26,7 @@ static void	sort_names(char **names, int count)
 	{
 		tmp = names[i];
 		j = i - 1;
-		while (j >= 0 && ft_strcmp(names[j], tmp) > 0)
+		while (j >= 0 && cmp_names(names[j], tmp, opts) > 0)
 		{
 			names[j + 1] = names[j];
 			j--;
@@ -109,8 +121,32 @@ static void	free_names(char **names, int count)
 	free(names);
 }
 
+static void	recurse_dirs(const char *path, char **names, int count,
+		t_options *opts)
+{
+	int			i;
+	char		*full;
+	struct stat	st;
+
+	i = 0;
+	while (i < count)
+	{
+		if (ft_strcmp(names[i], ".") != 0 && ft_strcmp(names[i], "..") != 0)
+		{
+			full = path_join(path, names[i]);
+			if (full && lstat(full, &st) == 0 && S_ISDIR(st.st_mode))
+			{
+				output_char_fd('\n', 1);
+				list_dir(full, opts, 1);
+			}
+			free(full);
+		}
+		i++;
+	}
+}
+
 /*
-** List one directory: read, sort, print.
+** List one directory: read, sort, print, optionally recurse.
 */
 static void	list_dir(const char *path, t_options *opts, int print_header)
 {
@@ -126,7 +162,7 @@ static void	list_dir(const char *path, t_options *opts, int print_header)
 	count = read_dir(path, opts, &names);
 	if (count == -1)
 		return ;
-	sort_names(names, count);
+	sort_names(names, count, opts);
 	i = 0;
 	while (i < count)
 	{
@@ -134,6 +170,8 @@ static void	list_dir(const char *path, t_options *opts, int print_header)
 		output_char_fd('\n', 1);
 		i++;
 	}
+	if (opts->flag_upper_r)
+		recurse_dirs(path, names, count, opts);
 	free_names(names, count);
 }
 
@@ -142,8 +180,8 @@ int	execute(t_options *opts, t_args *args)
 	int	i;
 	int	print_header;
 
-	sort_names(args->paths, args->count);
-	print_header = (args->count > 1);
+	sort_names(args->paths, args->count, opts);
+	print_header = (args->count > 1) || opts->flag_upper_r;
 	i = 0;
 	while (i < args->count)
 	{
