@@ -1,2 +1,4 @@
 *.o
 ft_ls
+*.txt
+tmp/
