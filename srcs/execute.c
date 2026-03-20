@@ -2,44 +2,51 @@
 
 static void	list_dir(const char *path, t_options *opts, int print_header);
 
-/*
-** Simple insertion sort on an array of strings.
-*/
-static int	cmp_names(const char *a, const char *b, t_options *opts)
+static int	cmp_entries(t_entry *a, t_entry *b, t_options *opts)
 {
 	int	result;
 
-	result = ft_strcmp(a, b);
+	if (opts->flag_t)
+	{
+		if (a->stat.st_mtime > b->stat.st_mtime)
+			result = -1;
+		else if (a->stat.st_mtime < b->stat.st_mtime)
+			result = 1;
+		else
+			result = ft_strcmp(a->name, b->name);
+	}
+	else
+		result = ft_strcmp(a->name, b->name);
 	if (opts->flag_r)
 		return (-result);
 	return (result);
 }
 
-static void	sort_names(char **names, int count, t_options *opts)
+static void	sort_entries(t_entry *entries, int count, t_options *opts)
 {
 	int		i;
-	int		j;
-	char	*tmp;
+	int		swapped;
+	t_entry	tmp;
 
-	i = 1;
-	while (i < count)
+	swapped = 1;
+	while (swapped)
 	{
-		tmp = names[i];
-		j = i - 1;
-		while (j >= 0 && cmp_names(names[j], tmp, opts) > 0)
+		swapped = 0;
+		i = 0;
+		while (i < count - 1)
 		{
-			names[j + 1] = names[j];
-			j--;
+			if (cmp_entries(&entries[i], &entries[i + 1], opts) > 0)
+			{
+				tmp = entries[i];
+				entries[i] = entries[i + 1];
+				entries[i + 1] = tmp;
+				swapped = 1;
+			}
+			i++;
 		}
-		names[j + 1] = tmp;
-		i++;
 	}
 }
 
-/*
-** Count entries in a directory.
-** Skips dot-files unless -a is set.
-*/
 static int	count_entries(const char *path, t_options *opts)
 {
 	DIR				*dir;
@@ -61,16 +68,11 @@ static int	count_entries(const char *path, t_options *opts)
 	return (count);
 }
 
-/*
-** Read all visible entries from a directory into a name array.
-** First pass counts, second pass fills.
-** Returns the count, or -1 on error.
-*/
-static int	read_dir(const char *path, t_options *opts, char ***names_out)
+static int	read_dir(const char *path, t_options *opts, t_entry **out)
 {
 	DIR				*dir;
 	struct dirent	*ent;
-	char			**names;
+	t_entry			*entries;
 	int				count;
 	int				i;
 
@@ -80,13 +82,13 @@ static int	read_dir(const char *path, t_options *opts, char ***names_out)
 		print_errno_error(path);
 		return (-1);
 	}
-	names = malloc(sizeof(char *) * (count + 1));
-	if (!names)
+	entries = malloc(sizeof(t_entry) * (count + 1));
+	if (!entries)
 		return (-1);
 	dir = opendir(path);
 	if (!dir)
 	{
-		free(names);
+		free(entries);
 		return (-1);
 	}
 	i = 0;
@@ -95,62 +97,53 @@ static int	read_dir(const char *path, t_options *opts, char ***names_out)
 	{
 		if (ent->d_name[0] != '.' || opts->flag_a)
 		{
-			names[i] = ft_strdup(ent->d_name);
+			entries[i].name = ft_strdup(ent->d_name);
+			entries[i].path = path_join(path, ent->d_name);
+			lstat(entries[i].path, &entries[i].stat);
 			i++;
 		}
 		ent = readdir(dir);
 	}
 	closedir(dir);
-	*names_out = names;
+	*out = entries;
 	return (i);
 }
 
-/*
-** Free the names array.
-*/
-static void	free_names(char **names, int count)
+static void	free_entries(t_entry *entries, int count)
 {
 	int	i;
 
 	i = 0;
 	while (i < count)
 	{
-		free(names[i]);
+		free(entries[i].name);
+		free(entries[i].path);
 		i++;
 	}
-	free(names);
+	free(entries);
 }
 
-static void	recurse_dirs(const char *path, char **names, int count,
-		t_options *opts)
+static void	recurse_dirs(t_entry *entries, int count, t_options *opts)
 {
-	int			i;
-	char		*full;
-	struct stat	st;
+	int	i;
 
 	i = 0;
 	while (i < count)
 	{
-		if (ft_strcmp(names[i], ".") != 0 && ft_strcmp(names[i], "..") != 0)
+		if (ft_strcmp(entries[i].name, ".") != 0
+			&& ft_strcmp(entries[i].name, "..") != 0
+			&& S_ISDIR(entries[i].stat.st_mode))
 		{
-			full = path_join(path, names[i]);
-			if (full && lstat(full, &st) == 0 && S_ISDIR(st.st_mode))
-			{
-				output_char_fd('\n', 1);
-				list_dir(full, opts, 1);
-			}
-			free(full);
+			output_char_fd('\n', 1);
+			list_dir(entries[i].path, opts, 1);
 		}
 		i++;
 	}
 }
 
-/*
-** List one directory: read, sort, print, optionally recurse.
-*/
 static void	list_dir(const char *path, t_options *opts, int print_header)
 {
-	char	**names;
+	t_entry	*entries;
 	int		count;
 	int		i;
 
@@ -159,36 +152,49 @@ static void	list_dir(const char *path, t_options *opts, int print_header)
 		output_str_fd(path, 1);
 		output_str_fd(":\n", 1);
 	}
-	count = read_dir(path, opts, &names);
+	count = read_dir(path, opts, &entries);
 	if (count == -1)
 		return ;
-	sort_names(names, count, opts);
+	sort_entries(entries, count, opts);
 	i = 0;
 	while (i < count)
 	{
-		output_str_fd(names[i], 1);
+		output_str_fd(entries[i].name, 1);
 		output_char_fd('\n', 1);
 		i++;
 	}
 	if (opts->flag_upper_r)
-		recurse_dirs(path, names, count, opts);
-	free_names(names, count);
+		recurse_dirs(entries, count, opts);
+	free_entries(entries, count);
 }
 
 int	execute(t_options *opts, t_args *args)
 {
-	int	i;
-	int	print_header;
+	t_entry	*entries;
+	int		i;
+	int		print_header;
 
-	sort_names(args->paths, args->count, opts);
+	entries = malloc(sizeof(t_entry) * args->count);
+	if (!entries)
+		return (1);
+	i = 0;
+	while (i < args->count)
+	{
+		entries[i].name = ft_strdup(args->paths[i]);
+		entries[i].path = ft_strdup(args->paths[i]);
+		lstat(args->paths[i], &entries[i].stat);
+		i++;
+	}
+	sort_entries(entries, args->count, opts);
 	print_header = (args->count > 1) || opts->flag_upper_r;
 	i = 0;
 	while (i < args->count)
 	{
 		if (i > 0)
 			output_char_fd('\n', 1);
-		list_dir(args->paths[i], opts, print_header);
+		list_dir(entries[i].path, opts, print_header);
 		i++;
 	}
+	free_entries(entries, args->count);
 	return (0);
 }
