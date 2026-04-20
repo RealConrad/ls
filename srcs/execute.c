@@ -141,11 +141,28 @@ static void	recurse_dirs(t_entry *entries, int count, t_options *opts)
 	}
 }
 
+static void	print_entries(t_entry *entries, int count, t_options *opts)
+{
+	int	i;
+
+	if (opts->flag_l)
+		print_long_format(entries, count);
+	else
+	{
+		i = 0;
+		while (i < count)
+		{
+			output_str_fd(entries[i].name, 1);
+			output_char_fd('\n', 1);
+			i++;
+		}
+	}
+}
+
 static void	list_dir(const char *path, t_options *opts, int print_header)
 {
 	t_entry	*entries;
 	int		count;
-	int		i;
 
 	if (print_header)
 	{
@@ -156,13 +173,7 @@ static void	list_dir(const char *path, t_options *opts, int print_header)
 	if (count == -1)
 		return ;
 	sort_entries(entries, count, opts);
-	i = 0;
-	while (i < count)
-	{
-		output_str_fd(entries[i].name, 1);
-		output_char_fd('\n', 1);
-		i++;
-	}
+	print_entries(entries, count, opts);
 	if (opts->flag_upper_r)
 		recurse_dirs(entries, count, opts);
 	free_entries(entries, count);

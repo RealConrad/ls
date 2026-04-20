@@ -6,8 +6,13 @@
 # include <dirent.h>
 # include <sys/stat.h>
 # include <sys/types.h>
+# include <pwd.h>
+# include <grp.h>
+# include <time.h>
 # include <string.h>
 # include <errno.h>
+
+# define SIX_MONTHS 15768000
 
 typedef struct s_options
 {
@@ -31,16 +36,27 @@ typedef struct s_entry
 	struct stat	stat;
 }	t_entry;
 
+typedef struct s_column_data
+{
+	int		links;
+	int		owner;
+	int		group;
+	int		size;
+}	t_column_data;
+
 /* ---- parse_args.c ---- */
 int		parse_args(int ac, char **av, t_options *opts, t_args *args);
 
-/* ---- args_list.c ---- */
+/* ---- args_array.c ---- */
 int		args_init(t_args *args, int argc);
 void	args_add(t_args *args, char *path);
 void	args_free(t_args *args);
 
 /* ---- execute.c ---- */
 int		execute(t_options *opts, t_args *args);
+
+/* ---- format_long_output.c ---- */
+void	print_long_format(t_entry *entries, int count);
 
 /* ---- utils.c ---- */
 void	output_str_fd(const char *s, int fd);
@@ -49,6 +65,9 @@ size_t	ft_strlen(const char *s);
 int		ft_strcmp(const char *s1, const char *s2);
 char	*ft_strdup(const char *s);
 char	*path_join(const char *dir, const char *name);
+int		num_len(long n);
+void	print_num_padded(long n, int width);
+void	print_str_padded(const char *s, int width);
 
 /* ---- error.c ---- */
 void	print_usage_error(char invalid_flag);

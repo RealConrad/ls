@@ -81,3 +81,64 @@ char	*path_join(const char *dir, const char *name)
 	}
 	return (result);
 }
+
+int	num_len(long n)
+{
+	int	len;
+
+	if (n <= 0)
+		len = 1;
+	else
+		len = 0;
+	while (n)
+	{
+		n /= 10;
+		len++;
+	}
+	return (len);
+}
+
+static void	print_number(long n, int fd)
+{
+	char	c;
+
+	if (n < 0)
+	{
+		write(fd, "-", 1);
+		n = -n;
+	}
+	if (n >= 10)
+		print_number(n / 10, fd);
+	c = '0' + (n % 10);
+	write(fd, &c, 1);
+}
+
+void	print_num_padded(long n, int width)
+{
+	int	len;
+	int	i;
+
+	len = num_len(n);
+	i = 0;
+	while (i < width - len)
+	{
+		write(1, " ", 1);
+		i++;
+	}
+	print_number(n, 1);
+}
+
+void	print_str_padded(const char *s, int width)
+{
+	int	len;
+	int	i;
+
+	len = (int)ft_strlen(s);
+	output_str_fd(s, 1);
+	i = len;
+	while (i < width)
+	{
+		write(1, " ", 1);
+		i++;
+	}
+}

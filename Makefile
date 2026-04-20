@@ -12,7 +12,8 @@ SRCS	= $(SRCDIR)/main.c \
 		  $(SRCDIR)/args_array.c \
 		  $(SRCDIR)/execute.c \
 		  $(SRCDIR)/utils.c \
-		  $(SRCDIR)/error.c
+		  $(SRCDIR)/error.c \
+		  $(SRCDIR)/format_long_output.c
 
 OBJS	= $(SRCS:$(SRCDIR)/%.c=$(OBJDIR)/%.o)
 
